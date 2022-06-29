@@ -1,0 +1,61 @@
+public class Solution {
+  public int minDifference(int[] nums) {
+        int n = nums.length / 2;
+        int sum = 0;
+        for(int num : nums){
+          sum+=num;
+        }
+        int[] A = new int[n], B = new int[n];
+        List<List<Integer>> X = new ArrayList<>(), Y = new ArrayList<>();
+        
+        // 分割两个子集
+        for (int i = 0; i <= n; i++) {
+            if(i < n) {
+                A[i] = nums[i];
+                B[i] = nums[i + n];
+            }
+            X.add(new ArrayList<>());
+            Y.add(new ArrayList<>());
+        }
+        
+        // 进行组合枚举
+        for (int mask = 0; mask < 1 << n; mask++) {
+            int key = Integer.bitCount(mask);
+            int cnt_a = 0, cnt_b = 0;
+            for (int i = 0; i < n; i++) {
+                if (((mask >> i) & 1) == 1) {
+                    cnt_a += A[i];
+                    cnt_b += B[i];
+                }
+            }
+            X.get(key).add(cnt_a);
+            Y.get(key).add(cnt_b);
+        }
+
+        // 将Y进行排序，以便二分查找
+        for (int i = 0; i <= n; i++) {
+            Collections.sort(Y.get(i));
+        }
+
+        // 进行二分查找答案
+        int ans = Integer.MAX_VALUE;
+        for (int k = 0; k <= n; k++) {
+            List<Integer> x = X.get(k);
+            List<Integer> y = Y.get(n - k);
+            for (int i : x) {
+                int l = 0, r = y.size() - 1;
+                while (l < r) {
+                    int mid = (r - l) / 2 + l;
+                    int j = y.get(mid);
+                    if (i + j < sum / 2) {
+                        l = mid + 1;
+                    } else {
+                        r = mid;
+                    }
+                }
+                ans = Math.min(ans, Math.abs((sum - i - y.get(l) - (i + y.get(l)))));
+            }
+        }
+        return ans;
+    }
+}
